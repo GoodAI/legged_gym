@@ -56,6 +56,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
     class asset(LeggedRobotCfg.asset):
         file = "{LEGGED_GYM_ROOT_DIR}/resources/robots/v0/urdf/v0.urdf"
+        name = "v0"
         foot_name = "FOOT"
         penalize_contacts_on = [
             "CALF",
