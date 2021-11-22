@@ -35,13 +35,13 @@ class V0RoughCfg(LeggedRobotCfg):
         curriculum = False
         max_curriculum = 1.0
         resampling_time = 10.0  # time before command are changed[s]
-        heading_command = False  # compute ang vel command from heading error
+        heading_command = True  # compute ang vel command from heading error
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [-1.0, 1.0]  # min max [m/s]
+            lin_vel_x = [-1.2, 1.2]  # min max [m/s]
             lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-0.01, 0.01]  # min max [rad/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
             heading = [-3.14, 3.14]
 
     class control(LeggedRobotCfg.control):
@@ -74,20 +74,20 @@ class V0RoughCfg(LeggedRobotCfg):
 
         class scales(LeggedRobotCfg.rewards.scales):
             termination = -20.0
-            tracking_lin_vel = 1.0
-            tracking_ang_vel = 0.01
-            lin_vel_z = -0.001
-            ang_vel_xy = -1.0
-            orientation = -0.00004
-            torques = -0.00002
-            dof_vel = -0.0
-            dof_acc = -0.0
-            base_height = -0.0
-            feet_air_time = 1.0
-            collision = -0.00001
-            feet_stumble = -0.0
-            action_rate = -0.000001
-            stand_still = -0.000005
+            # tracking_lin_vel = 2.0
+            tracking_ang_vel = 0.1
+            # lin_vel_z = -2.001
+            # ang_vel_xy = -2.0
+            orientation = -0.1
+            # torques = -0.00002
+            # dof_vel = -0.0
+            # dof_acc = -0.0
+            # base_height = -0.0
+            # feet_air_time = 0.0
+            # collision = -0.00001
+            # feet_stumble = -0.0
+            action_rate = -0.0
+            # stand_still = -0.000005
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005

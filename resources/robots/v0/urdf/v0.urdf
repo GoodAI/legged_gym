@@ -83,7 +83,7 @@
     <child link="l1_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="10" lower="-1.2" upper="1.2" velocity="200"/>
+    <limit effort="55" lower="-1.2" upper="1.2" velocity="29"/>
   </joint>
   <link name="l1_segment_3_THIGH">
     <visual>
@@ -109,7 +109,7 @@
     <child link="l1_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.2" upper="0.75" velocity="90"/>
+    <limit effort="55" lower="-0.2" upper="0.75" velocity="29"/>
   </joint>
   <link name="l1_segment_4_FOOT">
     <visual>
@@ -135,7 +135,7 @@
     <child link="l1_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.2" upper="0.5" velocity="70"/>
+    <limit effort="55" lower="-0.2" upper="0.5" velocity="29"/>
   </joint>
   <!-- <xacro:leg name="l2" reflect="1">
 		<origin xyz="0 0.1 1.05" rpy="0 0 0" />
@@ -188,7 +188,7 @@
     <child link="l3_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="10" lower="-1.2" upper="1.2" velocity="200"/>
+    <limit effort="55" lower="-1.2" upper="1.2" velocity="29"/>
   </joint>
   <link name="l3_segment_3_THIGH">
     <visual>
@@ -214,7 +214,7 @@
     <child link="l3_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.2" upper="0.75" velocity="90"/>
+    <limit effort="55" lower="-0.2" upper="0.75" velocity="29"/>
   </joint>
   <link name="l3_segment_4_FOOT">
     <visual>
@@ -240,7 +240,7 @@
     <child link="l3_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.2" upper="0.5" velocity="70"/>
+    <limit effort="55" lower="-0.2" upper="0.5" velocity="29"/>
   </joint>
   <link name="r1_segment_1">
     <visual>
@@ -290,7 +290,7 @@
     <child link="r1_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="10" lower="-1.2" upper="1.2" velocity="200"/>
+    <limit effort="55" lower="-1.2" upper="1.2" velocity="29"/>
   </joint>
   <link name="r1_segment_3_THIGH">
     <visual>
@@ -316,7 +316,7 @@
     <child link="r1_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.75" upper="0.2" velocity="90"/>
+    <limit effort="55" lower="-0.75" upper="0.2" velocity="29"/>
   </joint>
   <link name="r1_segment_4_FOOT">
     <visual>
@@ -342,7 +342,7 @@
     <child link="r1_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.5" upper="0.2" velocity="70"/>
+    <limit effort="55" lower="-0.5" upper="0.2" velocity="29"/>
   </joint>
   <!-- <xacro:leg name="r2" reflect="-1">
 		<origin xyz="0 -0.1 1.05" rpy="0 0 0" />
@@ -395,7 +395,7 @@
     <child link="r3_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="10" lower="-1.2" upper="1.2" velocity="200"/>
+    <limit effort="55" lower="-1.2" upper="1.2" velocity="29"/>
   </joint>
   <link name="r3_segment_3_THIGH">
     <visual>
@@ -421,7 +421,7 @@
     <child link="r3_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.75" upper="0.2" velocity="90"/>
+    <limit effort="55" lower="-0.75" upper="0.2" velocity="29"/>
   </joint>
   <link name="r3_segment_4_FOOT">
     <visual>
@@ -447,6 +447,6 @@
     <child link="r3_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="10" lower="-0.5" upper="0.2" velocity="70"/>
+    <limit effort="55" lower="-0.5" upper="0.2" velocity="29"/>
   </joint>
 </robot>
