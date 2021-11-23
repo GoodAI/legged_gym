@@ -1,7 +1,22 @@
+import torch
+
 from legged_gym.envs.base.legged_robot_config import (
     LeggedRobotCfg,
     LeggedRobotCfgPPO,
 )
+from legged_gym.envs import LeggedRobot
+
+
+class V0Robot(LeggedRobot):
+    def _reward_speed_direction(self):
+        commands_xy = self.commands[:, :2]
+        command_normalized = torch.nan_to_num((commands_xy.T / torch.norm(commands_xy, dim=1, p=2)).T)
+        base_xy_velocity = self.base_lin_vel[:, :2]
+        base_xy_norm = torch.norm(base_xy_velocity, dim=1, p=2)
+        base_xy_velocity_normalized = (base_xy_velocity.T / base_xy_norm).T
+
+        r = base_xy_norm * (4. - torch.sum(torch.square(command_normalized - base_xy_velocity_normalized), dim=1)) / 4.
+        return r
 
 
 class V0RoughCfg(LeggedRobotCfg):
@@ -89,6 +104,7 @@ class V0RoughCfg(LeggedRobotCfg):
             # feet_stumble = -0.0
             action_rate = -0.0
             # stand_still = -0.000005
+            speed_direction = 0.71
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005
