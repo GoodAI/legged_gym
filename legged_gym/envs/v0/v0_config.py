@@ -8,15 +8,19 @@ from legged_gym.envs import LeggedRobot
 
 
 class V0Robot(LeggedRobot):
-    def _reward_speed_direction(self):
-        commands_xy = self.commands[:, :2]
-        command_normalized = torch.nan_to_num((commands_xy.T / torch.norm(commands_xy, dim=1, p=2)).T)
-        base_xy_velocity = self.base_lin_vel[:, :2]
-        base_xy_norm = torch.norm(base_xy_velocity, dim=1, p=2)
-        base_xy_velocity_normalized = (base_xy_velocity.T / base_xy_norm).T
+    def _reward_heading_deviation(self):
+        deviation = self.compute_heading_deviation().reshape(-1)
+        return torch.abs(deviation)
 
-        r = base_xy_norm * (4. - torch.sum(torch.square(command_normalized - base_xy_velocity_normalized), dim=1)) / 4.
-        return r
+    def _reward_speed_norm(self):
+        base_xy_velocity = self.base_lin_vel[:, :3]
+        return base_xy_velocity[:, 0]
+
+    def _reward_half_legs_on_ground(self):
+        contacts = self.contact_forces[:, self.feet_indices, 2] > 0.1
+        leg_contacts = torch.abs(torch.sum(1.*contacts, dim=1) - (len(self.feet_indices) / 2))
+
+        return 1. * leg_contacts
 
 
 class V0RoughCfg(LeggedRobotCfg):
@@ -44,7 +48,7 @@ class V0RoughCfg(LeggedRobotCfg):
         }
 
     class terrain(LeggedRobotCfg.terrain):
-        mesh_type = "trimesh"  # none, plane, heightfield or trimesh
+        mesh_type = "plane"  # none, plane, heightfield or trimesh
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
@@ -54,15 +58,15 @@ class V0RoughCfg(LeggedRobotCfg):
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [-1.2, 1.2]  # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
-            heading = [-3.14, 3.14]
+            lin_vel_x = [1, 1.]  # min max [m/s]
+            lin_vel_y = [0.0, 0.0]  # min max [m/s]
+            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
+            heading = [0, 0]
 
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
         control_type = "P"
-        stiffness = {"joint": 30.0}  # [N*m/rad]
+        stiffness = {"joint": 70.0}  # [N*m/rad]
         damping = {"joint": 0.2}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
@@ -76,9 +80,10 @@ class V0RoughCfg(LeggedRobotCfg):
         penalize_contacts_on = [
             "CALF",
             "THIGH",
+            "HIP",
         ]
-        terminate_after_contacts_on = ["HIP", "body"]
-        self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
+        terminate_after_contacts_on = ["body"]
+        self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter
 
     class rewards(LeggedRobotCfg.rewards):
         soft_dof_pos_limit = 1.0
@@ -89,22 +94,24 @@ class V0RoughCfg(LeggedRobotCfg):
         base_height_target = -0.2
 
         class scales(LeggedRobotCfg.rewards.scales):
-            termination = -20.0
-            # tracking_lin_vel = 2.0
-            tracking_ang_vel = 0.1
-            # lin_vel_z = -2.001
-            # ang_vel_xy = -2.0
-            orientation = -0.1
+            termination = -200.0
+            tracking_lin_vel = 0.0
+            tracking_ang_vel = 0.0
+            lin_vel_z = -0.001
+            ang_vel_xy = -0.
+            # orientation = -0.0
             # torques = -0.00002
-            # dof_vel = -0.0
-            # dof_acc = -0.0
+            dof_vel = -0.0
+            dof_acc = -0.0
             # base_height = -0.0
-            # feet_air_time = 0.0
+            feet_air_time = 0.0
             # collision = -0.00001
             # feet_stumble = -0.0
             action_rate = -0.0
             # stand_still = -0.000005
-            speed_direction = 0.71
+            heading_deviation = -1
+            speed_norm = 0.25
+            half_legs_on_ground = -0.25
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005
@@ -115,7 +122,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
 class V0SixRoughCfg(V0RoughCfg):
     class env(V0RoughCfg.env):
-        num_observations = 253
+        num_observations = 254
         num_actions = 3 * 6
 
     class asset(V0RoughCfg.asset):

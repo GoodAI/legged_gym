@@ -115,8 +115,10 @@ class LeggedRobot(BaseTask):
 
         # prepare quantities
         self.base_quat[:] = self.root_states[:, 3:7]
-        self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
-        self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
+        # self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
+        # self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
+        self.base_lin_vel[:] = self.root_states[:, 7:10]
+        self.base_ang_vel[:] = self.root_states[:, 10:13]
         self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
 
         self._post_physics_step_callback()
@@ -205,18 +207,38 @@ class LeggedRobot(BaseTask):
             rew = self._reward_termination() * self.reward_scales["termination"]
             self.rew_buf += rew
             self.episode_sums["termination"] += rew
-    
+
+    def compute_heading_deviation(self):
+        commands_xy = self.commands[:, :2]
+        command_normalized = torch.nan_to_num(
+            (commands_xy.T / torch.norm(commands_xy, dim=1, p=2)).T
+        )
+        base_xy_velocity = self.base_lin_vel[:, :3]
+        forward_orientation = torch.zeros_like(base_xy_velocity)
+        forward_orientation[:, 0] = 1.0
+        forward_orientation_quat = quat_rotate(self.base_quat, forward_orientation)
+        forward_orientation_quat = normalize(forward_orientation_quat)[:, :2]
+
+        self.heading_deviation = torch.acos((command_normalized * forward_orientation_quat).sum(dim=1))
+        self.heading_deviation = (torch.sign(forward_orientation_quat[:, 1]) * self.heading_deviation).reshape((-1, 1))
+
+        return self.heading_deviation
+
     def compute_observations(self):
         """ Computes observations
         """
+        self.compute_heading_deviation()
+
         self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel,
-                                    self.base_ang_vel  * self.obs_scales.ang_vel,
+                                    self.base_ang_vel * self.obs_scales.ang_vel,
                                     self.projected_gravity,
                                     self.commands[:, :3] * self.commands_scale,
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
                                     self.dof_vel * self.obs_scales.dof_vel,
-                                    self.actions
+                                    self.actions,
+                                    self.heading_deviation,
                                     ),dim=-1)
+
         # add perceptive inputs if not blind
         if self.cfg.terrain.measure_heights:
             heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.5 - self.measured_heights, -1, 1.) * self.obs_scales.height_measurements
@@ -473,8 +495,9 @@ class LeggedRobot(BaseTask):
         noise_vec[12:24] = noise_scales.dof_pos * noise_level * self.obs_scales.dof_pos
         noise_vec[24:36] = noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel
         noise_vec[36:48] = 0. # previous actions
+        noise_vec[48:49] = 0. # heading deviation
         if self.cfg.terrain.measure_heights:
-            noise_vec[48:235] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
+            noise_vec[49:236] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
         return noise_vec
 
     #----------------------------------------
