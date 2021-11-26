@@ -16,11 +16,12 @@
 			<xacro:insert_block name="origin" />
         </collision>
 		<inertial>
-			<mass value="${sizeX * sizeY * sizeZ * 50.}" />
+			<xacro:property name="weight" value="${sizeX * sizeY * sizeZ * 160}"/>
+			<mass value="${weight}"/>
 			<inertia
-				ixx="${1.0/12.0 * sizeX * sizeY * sizeZ * 50 * (sizeZ * sizeZ + sizeY * sizeY)}"
-				iyy="${1.0/12.0 * sizeX * sizeY * sizeZ * 50 * (sizeZ * sizeZ + sizeX * sizeX)}"
-				izz="${1.0/12.0 * sizeX * sizeY * sizeZ * 50 * (sizeY * sizeY + sizeX * sizeX)}"
+				ixx="${1.0/12.0 * weight * (sizeZ * sizeZ + sizeY * sizeY)}"
+				iyy="${1.0/12.0 * weight * (sizeZ * sizeZ + sizeX * sizeX)}"
+				izz="${1.0/12.0 * weight * (sizeY * sizeY + sizeX * sizeX)}"
 				ixy="0.0" ixz="0.0" iyz="0.0"/>
 		</inertial>
 	</xacro:macro>
@@ -49,7 +50,7 @@
 			<child link="${name}_segment_2_HIP" />
 			<origin xyz="0 0 0.25" rpy="0 0 0" />
 			<axis xyz="0.0 0.0 1.0" />
-			<limit effort="10" lower="-1.2" upper="1.2" velocity="200"/>
+			<limit effort="55" lower="-1.2" upper="1.2" velocity="29"/>
 		</joint>
 
 		<link name="${name}_segment_3_THIGH">
@@ -64,10 +65,10 @@
 			<origin xyz="-0.1 ${reflect*0.5} 0" rpy="0 0 0" />
 			<axis xyz="1.0 0.0 0.0" />
 			<xacro:if value="${reflect == -1}">
-				<limit effort="10" lower="-0.75" upper="0.2" velocity="90"/>
+				<limit effort="55" lower="-0.75" upper="0.2" velocity="29"/>
 			</xacro:if>
 			<xacro:unless value="${reflect == -1}">
-				<limit effort="10" lower="-0.2" upper="0.75" velocity="90"/>
+				<limit effort="55" lower="-0.2" upper="0.75" velocity="29"/>
 			</xacro:unless>
 		</joint>
 
@@ -83,10 +84,10 @@
 			<origin xyz="0.1 0 -0.55" rpy="0 0 0" />
 			<axis xyz="1.0 0.0 0.0" />
 			<xacro:if value="${reflect == -1}">
-				<limit effort="10" lower="-0.5" upper="0.2" velocity="70"/>
+				<limit effort="55" lower="-0.5" upper="0.2" velocity="29"/>
 			</xacro:if>
 			<xacro:unless value="${reflect == -1}">
-				<limit effort="10" lower="-0.2" upper="0.5" velocity="70"/>
+				<limit effort="55" lower="-0.2" upper="0.5" velocity="29"/>
 			</xacro:unless>
 		</joint>
 	</xacro:macro>
