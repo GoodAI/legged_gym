@@ -14,13 +14,22 @@ class V0Robot(LeggedRobot):
 
     def _reward_speed_norm(self):
         base_xy_velocity = self.base_lin_vel[:, :3]
+
         return base_xy_velocity[:, 0]
 
     def _reward_half_legs_on_ground(self):
         contacts = self.contact_forces[:, self.feet_indices, 2] > 0.1
-        leg_contacts = torch.abs(torch.sum(1.*contacts, dim=1) - (len(self.feet_indices) / 2))
+        leg_contacts = torch.abs(
+            torch.sum(1.0 * contacts, dim=1) - (len(self.feet_indices) / 2)
+        )
 
-        return 1. * leg_contacts
+        return 1.0 * leg_contacts
+
+    def _reward_rotation_left(self):
+        return self.base_ang_vel[:, 2]
+
+    def _reward_rotation_right(self):
+        return -self.base_ang_vel[:, 2]
 
 
 class V0RoughCfg(LeggedRobotCfg):
@@ -47,18 +56,23 @@ class V0RoughCfg(LeggedRobotCfg):
             "r3_joint_3_to_4_FOOT": 0,
         }
 
+    class env(LeggedRobotCfg.env):
+        num_observations = 236
+        # num_observations = 49
+
     class terrain(LeggedRobotCfg.terrain):
-        mesh_type = "plane"  # none, plane, heightfield or trimesh
+        mesh_type = "trimesh"  # none, plane, heightfield or trimesh
+        measure_heights = mesh_type != "plane"
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
         max_curriculum = 1.0
         resampling_time = 10.0  # time before command are changed[s]
-        heading_command = True  # compute ang vel command from heading error
+        heading_command = False  # compute ang vel command from heading error
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [1, 1.]  # min max [m/s]
+            lin_vel_x = [0.5, 2.0]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
@@ -95,23 +109,25 @@ class V0RoughCfg(LeggedRobotCfg):
 
         class scales(LeggedRobotCfg.rewards.scales):
             termination = -200.0
-            tracking_lin_vel = 0.0
-            tracking_ang_vel = 0.0
+            tracking_lin_vel = 2.0
+            tracking_ang_vel = 0.1
             lin_vel_z = -0.001
-            ang_vel_xy = -0.
+            ang_vel_xy = -0.0
             # orientation = -0.0
             # torques = -0.00002
             dof_vel = -0.0
             dof_acc = -0.0
-            # base_height = -0.0
+            base_height = 0.0
             feet_air_time = 0.0
             # collision = -0.00001
             # feet_stumble = -0.0
             action_rate = -0.0
             # stand_still = -0.000005
             heading_deviation = -1
-            speed_norm = 0.25
+            speed_norm = 0.
             half_legs_on_ground = -0.25
+            rotation_left = 0
+            rotation_right = 0
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005

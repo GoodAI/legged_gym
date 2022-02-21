@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -32,12 +32,12 @@ from legged_gym.envs import AnymalCRoughCfg, AnymalCRoughCfgPPO
 
 class AnymalCFlatCfg( AnymalCRoughCfg ):
     class env( AnymalCRoughCfg.env ):
-        num_observations = 48
-  
+        num_observations = 49
+
     class terrain( AnymalCRoughCfg.terrain ):
         mesh_type = 'plane'
         measure_heights = False
-  
+
     class asset( AnymalCRoughCfg.asset ):
         self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
 
@@ -48,7 +48,7 @@ class AnymalCFlatCfg( AnymalCRoughCfg ):
             torques = -0.000025
             feet_air_time = 2.
             # feet_contact_forces = -0.01
-    
+
     class commands( AnymalCRoughCfg.commands ):
         heading_command = False
         resampling_time = 4.
