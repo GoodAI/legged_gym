@@ -77,6 +77,9 @@ class V0RoughCfg(LeggedRobotCfg):
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
 
+    class domain_rand(LeggedRobotCfg.domain_rand):
+        friction_range = [0.05, 4.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
+
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
         control_type = "P"
