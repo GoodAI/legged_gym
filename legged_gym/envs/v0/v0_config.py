@@ -57,12 +57,12 @@ class V0RoughCfg(LeggedRobotCfg):
         }
 
     class env(LeggedRobotCfg.env):
-        num_observations = 236
-        # num_observations = 49
+        # num_observations = 236
+        num_observations = 49
 
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
-        measure_heights = mesh_type != "plane"
+        measure_heights = False
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
