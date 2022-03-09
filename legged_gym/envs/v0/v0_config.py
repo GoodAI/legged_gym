@@ -127,7 +127,7 @@ class V0RoughCfg(LeggedRobotCfg):
             action_rate = -0.0
             # stand_still = -0.000005
             heading_deviation = -1
-            speed_norm = 0.
+            speed_norm = 0.1
             half_legs_on_ground = -0.25
             rotation_left = 0
             rotation_right = 0
