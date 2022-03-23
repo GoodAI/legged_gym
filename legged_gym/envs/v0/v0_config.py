@@ -74,6 +74,16 @@ class V0RoughCfg(LeggedRobotCfg):
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
         measure_heights = True
+        # select a unique terrain type and pass all arguments
+        curriculum = False
+        selected = True
+        # Dict of arguments for selected terrain
+        terrain_kwargs = {
+            "type": "terrain_utils.pyramid_stairs_terrain",
+            "step_width": 0.4,
+            "step_height": 0.2,
+            "platform_size": 3.,
+            }
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
