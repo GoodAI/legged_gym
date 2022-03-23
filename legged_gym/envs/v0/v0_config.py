@@ -31,6 +31,17 @@ class V0Robot(LeggedRobot):
     def _reward_rotation_right(self):
         return -self.base_ang_vel[:, 2]
 
+    def _reward_velwork(self):
+        diff_joint_pos = self.actions - self.last_actions
+        # torque_transpose = torch.transpose(self.torques, 0, 1)
+        energy = torch.abs(torch.sum(torch.inner(self.torques, diff_joint_pos), dim=1))     # this is the L1 norm
+        return self.base_lin_vel[:, 0] / (energy + 1)
+
+    def _reward_torques2(self):
+        # Penalize torques
+        torques2 = torch.square(self.torques)
+        torques2 += 0.2
+        return torch.sum(torques2, dim=1)
 
 class V0RoughCfg(LeggedRobotCfg):
     class init_state(LeggedRobotCfg.init_state):
@@ -58,7 +69,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
     class env(LeggedRobotCfg.env):
         # num_observations = 236
-        num_observations = 51
+        num_observations = 57
 
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
@@ -72,13 +83,15 @@ class V0RoughCfg(LeggedRobotCfg):
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [0.5, 2.0]  # min max [m/s]
+            lin_vel_x = [1.0, 1.6]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
 
     class domain_rand(LeggedRobotCfg.domain_rand):
         friction_range = [0.05, 4.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
+        randomize_base_mass = True
+        added_mass_range = [-5., 5.]
 
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
@@ -98,8 +111,9 @@ class V0RoughCfg(LeggedRobotCfg):
             "CALF",
             "THIGH",
             "HIP",
+            "body",
         ]
-        terminate_after_contacts_on = ["body"]
+        terminate_after_contacts_on = []
         self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter
 
     class rewards(LeggedRobotCfg.rewards):
@@ -112,12 +126,13 @@ class V0RoughCfg(LeggedRobotCfg):
 
         class scales(LeggedRobotCfg.rewards.scales):
             termination = -200.0
-            tracking_lin_vel = 2.0
+            tracking_lin_vel = 1
             tracking_ang_vel = 0.1
             lin_vel_z = -0.001
             ang_vel_xy = -0.0
             # orientation = -0.0
-            # torques = -0.00002
+            # torques = -0.00001
+            torques2 = 0
             dof_vel = -0.0
             dof_acc = -0.0
             base_height = 0.0
@@ -128,9 +143,10 @@ class V0RoughCfg(LeggedRobotCfg):
             # stand_still = -0.000005
             heading_deviation = -1
             speed_norm = 0.1
-            half_legs_on_ground = -0.25
+            half_legs_on_ground = -0
             rotation_left = 0
             rotation_right = 0
+            velwork = 20000
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005

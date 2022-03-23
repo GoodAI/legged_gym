@@ -237,6 +237,9 @@ class LeggedRobot(BaseTask):
                                     self.dof_vel * self.obs_scales.dof_vel,
                                     self.actions,
                                     self.heading_deviation,
+                                    self.frictions,
+                                    self.body_masses.unsqueeze(-1),
+                                    self.base_quat[:, :3],
                                     ),dim=-1)
 
         # add perceptive inputs if not blind
@@ -244,7 +247,7 @@ class LeggedRobot(BaseTask):
             heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.5 - self.measured_heights, -1, 1.) * self.obs_scales.height_measurements
             min_heights = heights.min(dim=1, keepdim=True).values
             max_heights = heights.max(dim=1, keepdim=True).values
-            self.obs_buf = torch.cat((self.obs_buf, min_heights, max_heights), dim=-1)
+            self.obs_buf = torch.cat((self.obs_buf, min_heights, max_heights, max_heights - min_heights), dim=-1)
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
@@ -295,9 +298,12 @@ class LeggedRobot(BaseTask):
                 bucket_ids = torch.randint(0, num_buckets, (self.num_envs, 1))
                 friction_buckets = torch_rand_float(friction_range[0], friction_range[1], (num_buckets,1), device='cpu')
                 self.friction_coeffs = friction_buckets[bucket_ids]
+                self.frictions = self.friction_coeffs.squeeze(-1).to(self.device)
 
             for s in range(len(props)):
                 props[s].friction = self.friction_coeffs[env_id]
+        else:
+            self.frictions = torch.full((self.num_envs, 1), fill_value=0.8, device=self.device)
         return props
 
     def _process_dof_props(self, props, env_id):
@@ -339,6 +345,7 @@ class LeggedRobot(BaseTask):
         if self.cfg.domain_rand.randomize_base_mass:
             rng = self.cfg.domain_rand.added_mass_range
             props[0].mass += np.random.uniform(rng[0], rng[1])
+        self.body_masses.append(props[0].mass)
         return props
 
     def _post_physics_step_callback(self):
@@ -454,7 +461,7 @@ class LeggedRobot(BaseTask):
             return
         distance = torch.norm(self.root_states[env_ids, :2] - self.env_origins[env_ids, :2], dim=1)
         # robots that walked far enough progress to harder terains
-        move_up = distance > self.terrain.env_length / 2
+        move_up = distance > self.terrain.env_length / 5
         # robots that walked less than half of their required distance go to simpler terrains
         move_down = (distance < torch.norm(self.commands[env_ids, :2], dim=1)*self.max_episode_length_s*0.5) * ~move_up
         self.terrain_levels[env_ids] += 1 * move_up - 1 * move_down
@@ -498,8 +505,11 @@ class LeggedRobot(BaseTask):
         noise_vec[24:36] = noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel
         noise_vec[36:48] = 0. # previous actions
         noise_vec[48:49] = 0. # heading deviation
+        noise_vec[49:50] = 0. # friction
+        noise_vec[50:51] = 0. # body masses
+        noise_vec[51:54] = 0. # body orientation
         if self.cfg.terrain.measure_heights:
-            noise_vec[49:236] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
+            noise_vec[54:236] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
         return noise_vec
 
     #----------------------------------------
@@ -692,6 +702,7 @@ class LeggedRobot(BaseTask):
         env_lower = gymapi.Vec3(0., 0., 0.)
         env_upper = gymapi.Vec3(0., 0., 0.)
         self.actor_handles = []
+        self.body_masses = []
         self.envs = []
         for i in range(self.num_envs):
             # create env instance
@@ -710,6 +721,8 @@ class LeggedRobot(BaseTask):
             self.gym.set_actor_rigid_body_properties(env_handle, actor_handle, body_props, recomputeInertia=True)
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
+
+        self.body_masses = torch.cuda.FloatTensor(self.body_masses) / 20
 
         self.feet_indices = torch.zeros(len(feet_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(feet_names)):
