@@ -34,11 +34,30 @@ class V0Robot(LeggedRobot):
     def _reward_velwork(self):
         diff_joint_pos = self.actions - self.last_actions
         # torque_transpose = torch.transpose(self.torques, 0, 1)
-        energy = torch.abs(torch.sum(torch.inner(self.torques, diff_joint_pos), dim=1))     # this is the L1 norm
-        return self.base_lin_vel[:, 0] / (energy + 1)
+        e = torch.abs(torch.sum(torch.inner(self.torques, diff_joint_pos), dim=1))     # this is the L1 norm
+        # energy = -(e- 300000)**2 + 10
+
+        # energy = -(e)**2 + 1
+        # energy = -(e/1e5)**2 + 1 # for 4x body mass
+        # energy = -(e/2e5)**2 + 1 # for 8x body mass
+        # energy = -(e/4e5)**2 + 1 # for 16x body mass
+        energy = -(e/4e5)**2  # for 16x body mass
+        # energy = -(e/1e5)**4 + 1
+        # energy = -torch.exp(e/1e5) + 15
+        # energy[e < 300000] = 10
+        # velocity = self.base_lin_vel[:, 0]
+        velocity = torch.linalg.vector_norm(self.base_lin_vel, dim=-1)
+        # print(e, energy, velocity)
+        # reward = (velocity + 1) * energy
+        # reward = velocity * energy
+        # # avoid situation with negative speed and negative energy
+        # # iow prevent robot to learn to move fast backwards and wasting a lot of energy
+        # reward[fwd_speed < 0.1] = -1e10
+        return energy
 
     def _reward_torques2(self):
-        # Penalize torques
+        velocity = torch.linalg.vector_norm(self.base_lin_vel, dim=-1)
+        return torch.sum(torch.abs(self.torques)) * velocity
         torques2 = torch.square(self.torques)
         torques2 += 0.2
         return torch.sum(torques2, dim=1)
@@ -75,15 +94,23 @@ class V0RoughCfg(LeggedRobotCfg):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
         measure_heights = True
         # select a unique terrain type and pass all arguments
-        curriculum = False
-        selected = True
-        # Dict of arguments for selected terrain
-        terrain_kwargs = {
-            "type": "terrain_utils.pyramid_stairs_terrain",
-            "step_width": 0.4,
-            "step_height": 0.2,
-            "platform_size": 3.,
-            }
+        # curriculum = False
+        # selected = True
+        # # # Dict of arguments for selected terrain
+        # terrain_kwargs = {
+        #     "type": "terrain_utils.pyramid_stairs_terrain",
+        #     "step_width": 0.4,
+        #     "step_height": -0.2,
+        #     "platform_size": 3.,
+        #     }
+        # terrain_kwargs = {
+        #     "type": "terrain_utils.discrete_obstacles_terrain",
+        #     "min_size": 1,
+        #     "max_size": 2,
+        #     "num_rects": 20,
+        #     "platform_size": 3.,
+        #     "max_height": 0.35,
+        # }
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
@@ -93,7 +120,7 @@ class V0RoughCfg(LeggedRobotCfg):
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [1.0, 1.6]  # min max [m/s]
+            lin_vel_x = [0.7, 1.6]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
@@ -106,8 +133,17 @@ class V0RoughCfg(LeggedRobotCfg):
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
         control_type = "P"
-        stiffness = {"joint": 70.0}  # [N*m/rad]
-        damping = {"joint": 0.2}  # [N*m*s/rad]
+        # 2x
+        # stiffness = {"joint": 120.0}  # [N*m/rad]
+        # damping = {"joint": 0.6}  # [N*m*s/rad]
+        # 4x
+        # urdf effort 155
+        # stiffness = {"joint": 1470.0}  # [N*m/rad]
+        # damping = {"joint": 2.3}  # [N*m*s/rad]
+        # 8x
+        # urdf effort 255
+        stiffness = {"joint": 3470.0}  # [N*m/rad]
+        damping = {"joint": 4.3}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
@@ -136,12 +172,12 @@ class V0RoughCfg(LeggedRobotCfg):
 
         class scales(LeggedRobotCfg.rewards.scales):
             termination = -200.0
-            tracking_lin_vel = 1
-            tracking_ang_vel = 0.1
-            lin_vel_z = -0.001
+            tracking_lin_vel = 2
+            tracking_ang_vel = 0
+            lin_vel_z = -0.00
             ang_vel_xy = -0.0
             # orientation = -0.0
-            # torques = -0.00001
+            torques = -5e-8
             torques2 = 0
             dof_vel = -0.0
             dof_acc = -0.0
@@ -151,12 +187,12 @@ class V0RoughCfg(LeggedRobotCfg):
             # feet_stumble = -0.0
             action_rate = -0.0
             # stand_still = -0.000005
-            heading_deviation = -1
-            speed_norm = 0.1
+            heading_deviation = -0.5
+            speed_norm = 0.
             half_legs_on_ground = -0
             rotation_left = 0
             rotation_right = 0
-            velwork = 20000
+            velwork = 0 #1e-2
 
     class sim(LeggedRobotCfg.sim):
         dt = 0.005

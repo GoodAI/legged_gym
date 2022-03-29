@@ -188,6 +188,11 @@ class LeggedRobot(BaseTask):
         # send timeout info to the algorithm
         if self.cfg.env.send_timeouts:
             self.extras["time_outs"] = self.time_out_buf
+        # energy and other things
+        self.extras["episode"]["energy"] = torch.mean(torch.abs(torch.sum(torch.inner(self.torques, self.actions - self.last_actions), dim=1)))
+        self.extras["episode"]["velocity"] = torch.mean(torch.linalg.vector_norm(self.base_lin_vel, dim=-1))
+        self.extras["episode"]["fwd_velocity"] = torch.mean(self.base_lin_vel[:, 0])
+        self.extras["episode"]["diff_joint"] = torch.mean(self.actions - self.last_actions)
 
     def compute_reward(self):
         """ Compute rewards
