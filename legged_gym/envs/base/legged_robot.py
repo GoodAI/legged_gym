@@ -488,7 +488,7 @@ class LeggedRobot(BaseTask):
             self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.5, 0., self.cfg.commands.max_curriculum)
 
 
-    def _get_noise_scale_vec(self, cfg):
+    def _get_noise_scale_vec(self):
         """ Sets a vector used to scale the noise added to the observations.
             [NOTE]: Must be adapted when changing the observations structure
 
@@ -502,19 +502,27 @@ class LeggedRobot(BaseTask):
         self.add_noise = self.cfg.noise.add_noise
         noise_scales = self.cfg.noise.noise_scales
         noise_level = self.cfg.noise.noise_level
+        num_actions = self.cfg.env.num_actions
         noise_vec[:3] = noise_scales.lin_vel * noise_level * self.obs_scales.lin_vel
         noise_vec[3:6] = noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel
         noise_vec[6:9] = noise_scales.gravity * noise_level
         noise_vec[9:12] = 0. # commands
-        noise_vec[12:24] = noise_scales.dof_pos * noise_level * self.obs_scales.dof_pos
-        noise_vec[24:36] = noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel
-        noise_vec[36:48] = 0. # previous actions
-        noise_vec[48:49] = 0. # heading deviation
-        noise_vec[49:50] = 0. # friction
-        noise_vec[50:51] = 0. # body masses
-        noise_vec[51:54] = 0. # body orientation
+        next_start = 12
+        next_end = next_start + num_actions
+        noise_vec[next_start:next_end] = noise_scales.dof_pos * noise_level * self.obs_scales.dof_pos
+        next_start = next_end
+        next_end = next_start + num_actions
+        noise_vec[next_start:next_end] = noise_scales.dof_vel * noise_level * self.obs_scales.dof_vel
+        next_start = next_end
+        next_end = next_start + num_actions
+        noise_vec[next_start:next_end] = 0. # previous actions
+        next_start = next_end
+        noise_vec[next_start:next_start + 1] = 0. # heading deviation
+        noise_vec[next_start + 1:next_start + 2] = 0. # friction
+        noise_vec[next_start + 2:next_start + 3] = 0. # body masses
+        noise_vec[next_start + 3:next_start + 6] = 0. # body orientation
         if self.cfg.terrain.measure_heights:
-            noise_vec[54:236] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
+            noise_vec[next_start + 6:next_start + 182] = noise_scales.height_measurements* noise_level * self.obs_scales.height_measurements
         return noise_vec
 
     #----------------------------------------
@@ -541,7 +549,7 @@ class LeggedRobot(BaseTask):
         # initialize some data used later on
         self.common_step_counter = 0
         self.extras = {}
-        self.noise_scale_vec = self._get_noise_scale_vec(self.cfg)
+        self.noise_scale_vec = self._get_noise_scale_vec()
         self.gravity_vec = to_torch(get_axis_params(-1., self.up_axis_idx), device=self.device).repeat((self.num_envs, 1))
         self.forward_vec = to_torch([1., 0., 0.], device=self.device).repeat((self.num_envs, 1))
         self.torques = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)

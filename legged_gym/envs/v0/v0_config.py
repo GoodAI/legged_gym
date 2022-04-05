@@ -142,8 +142,8 @@ class V0RoughCfg(LeggedRobotCfg):
         # damping = {"joint": 2.3}  # [N*m*s/rad]
         # 8x
         # urdf effort 255
-        stiffness = {"joint": 3470.0}  # [N*m/rad]
-        damping = {"joint": 4.3}  # [N*m*s/rad]
+        stiffness = {"joint": 2070.0}  # [N*m/rad]
+        damping = {"joint": 0.3}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
@@ -203,7 +203,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
 class V0SixRoughCfg(V0RoughCfg):
     class env(V0RoughCfg.env):
-        num_observations = 254
+        num_observations = 75
         num_actions = 3 * 6
 
     class asset(V0RoughCfg.asset):
