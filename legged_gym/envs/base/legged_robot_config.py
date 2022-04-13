@@ -160,6 +160,9 @@ class LeggedRobotCfg(BaseConfig):
             dof_pos = 1.0
             dof_vel = 0.05
             height_measurements = 1.0
+            body_mass = 1.0
+            actions = 1.0
+            friction = 1.0
         clip_observations = 100.
         clip_actions = 100.
 
@@ -211,6 +214,8 @@ class LeggedRobotCfgPPO(BaseConfig):
         # rnn_type = 'lstm'
         # rnn_hidden_size = 512
         # rnn_num_layers = 1
+        # only for 'ActorCriticEnvEncoder'
+        num_env_params = 10
 
     class algorithm:
         # training params

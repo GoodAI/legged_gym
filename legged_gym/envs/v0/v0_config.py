@@ -88,7 +88,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
     class env(LeggedRobotCfg.env):
         # num_observations = 236
-        num_observations = 57
+        num_observations = 52
 
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
@@ -124,11 +124,15 @@ class V0RoughCfg(LeggedRobotCfg):
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
+            push_robots = True
+            push_interval_s = 10
+            max_push_vel_xy = 100.
+
 
     class domain_rand(LeggedRobotCfg.domain_rand):
         friction_range = [0.05, 4.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
         randomize_base_mass = True
-        added_mass_range = [-5., 5.]
+        added_mass_range = [-5., 1000.]
 
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
@@ -194,6 +198,22 @@ class V0RoughCfg(LeggedRobotCfg):
             rotation_right = 0
             velwork = 0 #1e-2
 
+    class normalization(LeggedRobotCfg.normalization):
+        class obs_scales(LeggedRobotCfg.normalization.obs_scales):
+            lin_vel = 0.5
+            ang_vel = 0.25
+            dof_pos = 1.0
+            dof_vel = 0.05
+            height_measurements = 1.0
+            body_mass = 0.004
+            actions = 0.125
+            friction = 0.25
+        clip_observations = 100.
+        clip_actions = 100.
+
+    class noise(LeggedRobotCfg.noise):
+        add_noise = False
+
     class sim(LeggedRobotCfg.sim):
         dt = 0.005
         substeps = 1
@@ -203,7 +223,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
 class V0SixRoughCfg(V0RoughCfg):
     class env(V0RoughCfg.env):
-        num_observations = 75
+        num_observations = 70
         num_actions = 3 * 6
 
     class asset(V0RoughCfg.asset):
@@ -213,6 +233,8 @@ class V0SixRoughCfg(V0RoughCfg):
 class V0RoughCfgPPO(LeggedRobotCfgPPO):
     class algorithm(LeggedRobotCfgPPO.algorithm):
         entropy_coef = 0.01
+        learning_rate = 2.e-5 #5.e-4
+        schedule = 'adaptive' # could be adaptive, fixed
 
     class runner(LeggedRobotCfgPPO.runner):
         run_name = ""

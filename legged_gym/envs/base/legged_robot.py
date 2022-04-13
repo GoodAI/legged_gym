@@ -234,16 +234,17 @@ class LeggedRobot(BaseTask):
         """
         self.compute_heading_deviation()
 
-        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel,
-                                    self.base_ang_vel * self.obs_scales.ang_vel,
-                                    self.projected_gravity,
-                                    self.commands[:, :3] * self.commands_scale,
+        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, # 3
+                                    self.base_ang_vel * self.obs_scales.ang_vel, # 6
+                                    # self.projected_gravity, # 9
+                                    # self.commands[:, :3] * self.commands_scale, # 12
+                                    self.commands[:, :1] * self.obs_scales.lin_vel, # 12
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
-                                    self.dof_vel * self.obs_scales.dof_vel,
-                                    self.actions,
-                                    self.heading_deviation,
-                                    self.frictions,
-                                    self.body_masses.unsqueeze(-1),
+                                    (self.dof_vel * self.obs_scales.dof_vel),
+                                    (self.actions * self.obs_scales.actions),
+                                    (self.heading_deviation),
+                                    self.frictions * self.obs_scales.friction,
+                                    self.body_masses.unsqueeze(-1) * self.obs_scales.body_mass,
                                     self.base_quat[:, :3],
                                     ),dim=-1)
 
@@ -367,7 +368,7 @@ class LeggedRobot(BaseTask):
 
         if self.cfg.terrain.measure_heights:
             self.measured_heights = self._get_heights()
-        if self.cfg.domain_rand.push_robots and  (self.common_step_counter % self.cfg.domain_rand.push_interval == 0):
+        if self.cfg.domain_rand.push_robots and (self.common_step_counter % self.cfg.domain_rand.push_interval == 0):
             self._push_robots()
 
     def _resample_commands(self, env_ids):
@@ -735,7 +736,7 @@ class LeggedRobot(BaseTask):
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
-        self.body_masses = torch.cuda.FloatTensor(self.body_masses) / 20
+        self.body_masses = torch.cuda.FloatTensor(self.body_masses)
 
         self.feet_indices = torch.zeros(len(feet_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(feet_names)):
