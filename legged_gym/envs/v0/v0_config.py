@@ -240,3 +240,10 @@ class V0RoughCfgPPO(LeggedRobotCfgPPO):
     class runner(LeggedRobotCfgPPO.runner):
         run_name = ""
         experiment_name = "rough_v0"
+        policy_class_name = 'ActorCriticEnvEncoder'
+        algorithm_class_name = 'PPO'
+
+    class policy(LeggedRobotCfgPPO.policy):
+        num_env_params = 11
+        xt_index = 18
+        action_index = 54

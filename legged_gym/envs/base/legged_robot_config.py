@@ -217,7 +217,7 @@ class LeggedRobotCfgPPO(BaseConfig):
         # rnn_hidden_size = 512
         # rnn_num_layers = 1
         # only for 'ActorCriticEnvEncoder'
-        num_env_params = 10
+        num_env_params = 11
 
     class algorithm:
         # training params
