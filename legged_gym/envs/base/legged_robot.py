@@ -246,6 +246,8 @@ class LeggedRobot(BaseTask):
                                     self.frictions * self.obs_scales.friction,
                                     self.body_masses.unsqueeze(-1) * self.obs_scales.body_mass,
                                     self.base_quat[:, :3],
+                                    self.body_com_x.unsqueeze(-1),
+                                    self.body_com_y.unsqueeze(-1),
                                     ),dim=-1)
 
         # add perceptive inputs if not blind
@@ -351,7 +353,15 @@ class LeggedRobot(BaseTask):
         if self.cfg.domain_rand.randomize_base_mass:
             rng = self.cfg.domain_rand.added_mass_range
             props[0].mass += np.random.uniform(rng[0], rng[1])
+
+        if self.cfg.domain_rand.randomize_com:
+            rng = self.cfg.domain_rand.com_range
+            props[0].com.x += np.random.uniform(rng[0], rng[1])
+            props[0].com.y += np.random.uniform(rng[0], rng[1])
+
         self.body_masses.append(props[0].mass)
+        self.body_com_x.append(props[0].com.x)
+        self.body_com_y.append(props[0].com.y)
         return props
 
     def _post_physics_step_callback(self):
@@ -717,6 +727,7 @@ class LeggedRobot(BaseTask):
         env_upper = gymapi.Vec3(0., 0., 0.)
         self.actor_handles = []
         self.body_masses = []
+        self.body_com_x, self.body_com_y = [], []
         self.envs = []
         for i in range(self.num_envs):
             # create env instance
@@ -737,6 +748,8 @@ class LeggedRobot(BaseTask):
             self.actor_handles.append(actor_handle)
 
         self.body_masses = torch.cuda.FloatTensor(self.body_masses)
+        self.body_com_x = torch.cuda.FloatTensor(self.body_com_x)
+        self.body_com_y = torch.cuda.FloatTensor(self.body_com_y)
 
         self.feet_indices = torch.zeros(len(feet_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(feet_names)):

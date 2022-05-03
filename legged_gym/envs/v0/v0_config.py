@@ -88,7 +88,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
     class env(LeggedRobotCfg.env):
         # num_observations = 236
-        num_observations = 52
+        num_observations = 54
 
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
@@ -132,7 +132,8 @@ class V0RoughCfg(LeggedRobotCfg):
     class domain_rand(LeggedRobotCfg.domain_rand):
         friction_range = [0.05, 4.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
         randomize_base_mass = True
-        added_mass_range = [-5., 1000.]
+        added_mass_range = [-20., 400.]
+        randomize_com = True
 
     class control(LeggedRobotCfg.control):
         # PD Drive parameters:
@@ -223,7 +224,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
 class V0SixRoughCfg(V0RoughCfg):
     class env(V0RoughCfg.env):
-        num_observations = 70
+        num_observations = 72
         num_actions = 3 * 6
 
     class asset(V0RoughCfg.asset):

@@ -123,6 +123,8 @@ class LeggedRobotCfg(BaseConfig):
         friction_range = [0.5, 1.25]
         randomize_base_mass = False
         added_mass_range = [-1., 1.]
+        randomize_com = False
+        com_range = [-0.2, 0.2]
         push_robots = True
         push_interval_s = 15
         max_push_vel_xy = 1.
