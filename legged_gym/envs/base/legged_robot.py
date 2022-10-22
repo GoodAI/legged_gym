@@ -44,9 +44,10 @@ from typing import Tuple, Dict
 from legged_gym import LEGGED_GYM_ROOT_DIR
 from legged_gym.envs.base.base_task import BaseTask
 from legged_gym.utils.terrain import Terrain
-from legged_gym.utils.math import quat_apply_yaw, wrap_to_pi, torch_rand_sqrt_float
+from legged_gym.utils.math import quat_apply_yaw, wrap_to_pi
 from legged_gym.utils.helpers import class_to_dict
 from .legged_robot_config import LeggedRobotCfg
+
 
 class LeggedRobot(BaseTask):
     def __init__(self, cfg: LeggedRobotCfg, sim_params, physics_engine, sim_device, headless):
@@ -87,8 +88,17 @@ class LeggedRobot(BaseTask):
         # step physics and render each frame
         self.render()
         for _ in range(self.cfg.control.decimation):
-            self.torques = self._compute_torques(self.actions).view(self.torques.shape)
-            self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
+            if self.cfg.control.control_type not in ["D", "V"]:
+                self.torques = self._compute_torques(self.actions).view(self.torques.shape)
+                self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
+            elif self.cfg.control.control_type == "D":
+                self.torques = self._compute_torques(self.actions, "P").view(self.torques.shape)
+                l_actions = self.actions * self.cfg.control.action_scale + self.default_dof_pos
+                self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(l_actions))
+            else:
+                self.torques = self._compute_torques(self.actions, "V").view(self.torques.shape)
+                self.gym.set_dof_velocity_target_tensor(self.sim, gymtorch.unwrap_tensor(self.actions))
+
             self.gym.simulate(self.sim)
             if self.device == 'cpu':
                 self.gym.fetch_results(self.sim, True)
@@ -397,7 +407,7 @@ class LeggedRobot(BaseTask):
         # set small commands to zero
         self.commands[env_ids, :2] *= (torch.norm(self.commands[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
 
-    def _compute_torques(self, actions):
+    def _compute_torques(self, actions, control_t=None):
         """ Compute torques from actions.
             Actions can be interpreted as position or velocity targets given to a PD controller, or directly as scaled torques.
             [NOTE]: torques must have the same dimension as the number of DOFs, even if some DOFs are not actuated.
@@ -410,9 +420,11 @@ class LeggedRobot(BaseTask):
         """
         #pd controller
         actions_scaled = actions * self.cfg.control.action_scale
-        control_type = self.cfg.control.control_type
+        control_type = control_t or self.cfg.control.control_type
         if control_type=="P":
             torques = self.p_gains*(actions_scaled + self.default_dof_pos - self.dof_pos) - self.d_gains*self.dof_vel
+        elif control_type == "R":
+            torques = self.p_gains*(actions_scaled - self.dof_pos)
         elif control_type=="V":
             torques = self.p_gains*(actions_scaled - self.dof_vel) - self.d_gains*(self.dof_vel - self.last_dof_vel)/self.sim_params.dt
         elif control_type=="T":

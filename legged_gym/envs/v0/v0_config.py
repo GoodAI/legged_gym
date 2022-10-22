@@ -136,8 +136,11 @@ class V0RoughCfg(LeggedRobotCfg):
         randomize_com = True
 
     class control(LeggedRobotCfg.control):
-        # PD Drive parameters:
-        control_type = "P"
+        # PD Drive parameters: must be in sync with asset.default_dof_drive_mode
+        # control_type = "P"
+        # control_type = "R"
+        # control_type = "V" # set velocity of the joint
+        control_type = "D" # set position of the joint
         # 2x
         # stiffness = {"joint": 120.0}  # [N*m/rad]
         # damping = {"joint": 0.6}  # [N*m*s/rad]
@@ -166,6 +169,9 @@ class V0RoughCfg(LeggedRobotCfg):
         ]
         terminate_after_contacts_on = []
         self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter
+        # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 3 effort)
+        # must be in sync with control.control_type
+        default_dof_drive_mode = 1
 
     class rewards(LeggedRobotCfg.rewards):
         soft_dof_pos_limit = 1.0
