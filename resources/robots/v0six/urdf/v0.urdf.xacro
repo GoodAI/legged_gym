@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v0">
 
-	<xacro:macro name="box" params="sizeX sizeY sizeZ color *origin">
+	<xacro:property name="VELOCITY" value="3.2"/>
+	<xacro:property name="FRICTION" value="0"/>
+	<xacro:property name="EFFORT" value="2048"/>
+	<xacro:macro name="box" params="sizeX sizeY sizeZ color weight_multiplier:=160 *origin">
 		<visual>
 			<geometry>
 				<box size="${sizeX} ${sizeY} ${sizeZ}" />
@@ -16,7 +19,7 @@
 			<xacro:insert_block name="origin" />
         </collision>
 		<inertial>
-			<xacro:property name="weight" value="${sizeX * sizeY * sizeZ * 160 * 16}"/>
+			<xacro:property name="weight" value="${sizeX * sizeY * sizeZ * 16 * weight_multiplier}"/>
 			<mass value="${weight}"/>
 			<inertia
 				ixx="${1.0/12.0 * weight * (sizeZ * sizeZ + sizeY * sizeY)}"
@@ -37,6 +40,7 @@
 			<parent link="body" />
 			<child link="${name}_segment_1" />
 			<xacro:insert_block name="origin" />
+			<dynamics damping="0.0" friction="${FRICTION}"/>
 		</joint>
 
 		<link name="${name}_segment_2_HIP">
@@ -50,7 +54,8 @@
 			<child link="${name}_segment_2_HIP" />
 			<origin xyz="0 0 0.25" rpy="0 0 0" />
 			<axis xyz="0.0 0.0 1.0" />
-			<limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+			<limit effort="${EFFORT}" lower="-1.2" upper="1.2" velocity="${VELOCITY}"/>
+			<dynamics damping="0.0" friction="${FRICTION}"/>
 		</joint>
 
 		<link name="${name}_segment_3_THIGH">
@@ -65,11 +70,12 @@
 			<origin xyz="-0.1 ${reflect*0.5} 0" rpy="0 0 0" />
 			<axis xyz="1.0 0.0 0.0" />
 			<xacro:if value="${reflect == -1}">
-				<limit effort="2048" lower="-0.75" upper="0.2" velocity="20"/>
+				<limit effort="${EFFORT}" lower="-0.75" upper="0.2" velocity="${VELOCITY}"/>
 			</xacro:if>
 			<xacro:unless value="${reflect == -1}">
-				<limit effort="2048" lower="-0.2" upper="0.75" velocity="20"/>
+				<limit effort="${EFFORT}" lower="-0.2" upper="0.75" velocity="${VELOCITY}"/>
 			</xacro:unless>
+			<dynamics damping="0.0" friction="${FRICTION}"/>
 		</joint>
 
 		<link name="${name}_segment_4_FOOT">
@@ -84,11 +90,12 @@
 			<origin xyz="0.1 0 -0.55" rpy="0 0 0" />
 			<axis xyz="1.0 0.0 0.0" />
 			<xacro:if value="${reflect == -1}">
-				<limit effort="2048" lower="-0.5" upper="0.2" velocity="20"/>
+				<limit effort="${EFFORT}" lower="-0.5" upper="0.2" velocity="${VELOCITY}"/>
 			</xacro:if>
 			<xacro:unless value="${reflect == -1}">
-				<limit effort="2048" lower="-0.2" upper="0.5" velocity="20"/>
+				<limit effort="${EFFORT}" lower="-0.2" upper="0.5" velocity="${VELOCITY}"/>
 			</xacro:unless>
+			<dynamics damping="0.0" friction="${FRICTION}"/>
 		</joint>
 	</xacro:macro>
 

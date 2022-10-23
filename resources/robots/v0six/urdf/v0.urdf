@@ -58,6 +58,7 @@
     <parent link="body"/>
     <child link="l1_segment_1"/>
     <origin rpy="0 0 0" xyz="0.5 0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l1_segment_2_HIP">
     <visual>
@@ -83,7 +84,8 @@
     <child link="l1_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l1_segment_3_THIGH">
     <visual>
@@ -109,7 +111,8 @@
     <child link="l1_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.75" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.75" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l1_segment_4_FOOT">
     <visual>
@@ -135,7 +138,8 @@
     <child link="l1_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.5" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.5" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l2_segment_1">
     <visual>
@@ -160,6 +164,7 @@
     <parent link="body"/>
     <child link="l2_segment_1"/>
     <origin rpy="0 0 0" xyz="0 0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l2_segment_2_HIP">
     <visual>
@@ -185,7 +190,8 @@
     <child link="l2_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l2_segment_3_THIGH">
     <visual>
@@ -211,7 +217,8 @@
     <child link="l2_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.75" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.75" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l2_segment_4_FOOT">
     <visual>
@@ -237,7 +244,8 @@
     <child link="l2_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.5" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.5" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l3_segment_1">
     <visual>
@@ -262,6 +270,7 @@
     <parent link="body"/>
     <child link="l3_segment_1"/>
     <origin rpy="0 0 0" xyz="-0.5 0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l3_segment_2_HIP">
     <visual>
@@ -287,7 +296,8 @@
     <child link="l3_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l3_segment_3_THIGH">
     <visual>
@@ -313,7 +323,8 @@
     <child link="l3_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.75" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.75" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="l3_segment_4_FOOT">
     <visual>
@@ -339,7 +350,8 @@
     <child link="l3_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.2" upper="0.5" velocity="20"/>
+    <limit effort="2048" lower="-0.2" upper="0.5" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r1_segment_1">
     <visual>
@@ -364,6 +376,7 @@
     <parent link="body"/>
     <child link="r1_segment_1"/>
     <origin rpy="0 0 0" xyz="0.5 -0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r1_segment_2_HIP">
     <visual>
@@ -389,7 +402,8 @@
     <child link="r1_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r1_segment_3_THIGH">
     <visual>
@@ -415,7 +429,8 @@
     <child link="r1_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.75" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.75" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r1_segment_4_FOOT">
     <visual>
@@ -441,7 +456,8 @@
     <child link="r1_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.5" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.5" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r2_segment_1">
     <visual>
@@ -466,6 +482,7 @@
     <parent link="body"/>
     <child link="r2_segment_1"/>
     <origin rpy="0 0 0" xyz="0 -0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r2_segment_2_HIP">
     <visual>
@@ -491,7 +508,8 @@
     <child link="r2_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r2_segment_3_THIGH">
     <visual>
@@ -517,7 +535,8 @@
     <child link="r2_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.75" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.75" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r2_segment_4_FOOT">
     <visual>
@@ -543,7 +562,8 @@
     <child link="r2_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.5" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.5" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r3_segment_1">
     <visual>
@@ -568,6 +588,7 @@
     <parent link="body"/>
     <child link="r3_segment_1"/>
     <origin rpy="0 0 0" xyz="-0.5 -0.1 .75"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r3_segment_2_HIP">
     <visual>
@@ -593,7 +614,8 @@
     <child link="r3_segment_2_HIP"/>
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
     <axis xyz="0.0 0.0 1.0"/>
-    <limit effort="2048" lower="-1.2" upper="1.2" velocity="20"/>
+    <limit effort="2048" lower="-1.2" upper="1.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r3_segment_3_THIGH">
     <visual>
@@ -619,7 +641,8 @@
     <child link="r3_segment_3_THIGH"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.5 0"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.75" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.75" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
   <link name="r3_segment_4_FOOT">
     <visual>
@@ -645,6 +668,7 @@
     <child link="r3_segment_4_FOOT"/>
     <origin rpy="0 0 0" xyz="0.1 0 -0.55"/>
     <axis xyz="1.0 0.0 0.0"/>
-    <limit effort="2048" lower="-0.5" upper="0.2" velocity="20"/>
+    <limit effort="2048" lower="-0.5" upper="0.2" velocity="3.2"/>
+    <dynamics damping="0.0" friction="0"/>
   </joint>
 </robot>
