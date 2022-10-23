@@ -153,9 +153,9 @@ class V0RoughCfg(LeggedRobotCfg):
         stiffness = {"joint": 2070.0}  # [N*m/rad]
         damping = {"joint": 0.3}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
-        action_scale = 0.25
+        action_scale = 3
         # decimation: Number of control action updates @ sim DT per policy DT
-        decimation = 4
+        decimation = 1
 
     class asset(LeggedRobotCfg.asset):
         file = "{LEGGED_GYM_ROOT_DIR}/resources/robots/v0/urdf/v0.urdf"
@@ -216,13 +216,13 @@ class V0RoughCfg(LeggedRobotCfg):
             actions = 0.125
             friction = 0.25
         clip_observations = 100.
-        clip_actions = 100.
+        clip_actions = 1.
 
     class noise(LeggedRobotCfg.noise):
         add_noise = False
 
     class sim(LeggedRobotCfg.sim):
-        dt = 0.005
+        dt = 1 / 60  # 60 Hz
         substeps = 1
         gravity = [0.0, 0.0, -9.81]  # [m/s^2]
         up_axis = 1  # 0 is y, 1 is z
@@ -238,6 +238,8 @@ class V0SixRoughCfg(V0RoughCfg):
 
 
 class V0RoughCfgPPO(LeggedRobotCfgPPO):
+    seed = 101
+
     class algorithm(LeggedRobotCfgPPO.algorithm):
         entropy_coef = 0.01
         learning_rate = 2.e-5 #5.e-4
