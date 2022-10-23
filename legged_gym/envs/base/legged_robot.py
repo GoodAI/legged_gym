@@ -759,9 +759,9 @@ class LeggedRobot(BaseTask):
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
-        self.body_masses = torch.cuda.FloatTensor(self.body_masses)
-        self.body_com_x = torch.cuda.FloatTensor(self.body_com_x)
-        self.body_com_y = torch.cuda.FloatTensor(self.body_com_y)
+        self.body_masses = torch.tensor(self.body_masses, device=self.device, dtype=torch.float32)
+        self.body_com_x = torch.tensor(self.body_com_x, device=self.device, dtype=torch.float32)
+        self.body_com_y = torch.tensor(self.body_com_y, device=self.device, dtype=torch.float32)
 
         self.feet_indices = torch.zeros(len(feet_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(feet_names)):
