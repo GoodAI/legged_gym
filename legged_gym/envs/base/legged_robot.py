@@ -33,6 +33,8 @@ from time import time
 from warnings import WarningMessage
 import numpy as np
 import os
+import pandas as pd
+import math
 
 from isaacgym.torch_utils import *
 from isaacgym import gymtorch, gymapi, gymutil
@@ -76,6 +78,9 @@ class LeggedRobot(BaseTask):
         self._init_buffers()
         self._prepare_reward_function()
         self.init_done = True
+        self.iter = 0
+
+        self.df = pd.DataFrame()
 
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
@@ -143,6 +148,8 @@ class LeggedRobot(BaseTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
+
+        self.iter += 1
 
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
@@ -266,9 +273,20 @@ class LeggedRobot(BaseTask):
             min_heights = heights.min(dim=1, keepdim=True).values
             max_heights = heights.max(dim=1, keepdim=True).values
             self.obs_buf = torch.cat((self.obs_buf, min_heights, max_heights, max_heights - min_heights), dim=-1)
+
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
+
+        if self.iter == 0:
+            self.df = pd.DataFrame()
+
+        if self.iter < 10:
+            observations_df = pd.DataFrame(self.obs_buf.cpu().numpy())
+            self.df = pd.concat((self.df, observations_df), ignore_index=True)
+        elif self.iter == 10:
+            self.df.to_hdf("observations.h5", "table", mode="w", format="table")
+
 
     def create_sim(self):
         """ Creates simulation, terrain and evironments
