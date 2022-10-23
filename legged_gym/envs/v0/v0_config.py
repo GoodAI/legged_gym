@@ -58,9 +58,6 @@ class V0Robot(LeggedRobot):
     def _reward_torques2(self):
         velocity = torch.linalg.vector_norm(self.base_lin_vel, dim=-1)
         return torch.sum(torch.abs(self.torques)) * velocity
-        torques2 = torch.square(self.torques)
-        torques2 += 0.2
-        return torch.sum(torques2, dim=1)
 
 class V0RoughCfg(LeggedRobotCfg):
     class init_state(LeggedRobotCfg.init_state):
@@ -93,6 +90,14 @@ class V0RoughCfg(LeggedRobotCfg):
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = "trimesh"  # none, plane, heightfield or trimesh
         measure_heights = True
+        horizontal_scale = 0.1 # [m]
+        vertical_scale = 0.005 # [m]
+        border_size = 25 # [m]
+        max_init_terrain_level = 5 # starting curriculum state
+        terrain_length = 8.
+        terrain_width = 8.
+        num_rows= 10 # number of terrain rows (levels)
+        num_cols = 20 # number of terrain cols (types)
         # select a unique terrain type and pass all arguments
         # curriculum = False
         # selected = True
@@ -111,6 +116,13 @@ class V0RoughCfg(LeggedRobotCfg):
         #     "platform_size": 3.,
         #     "max_height": 0.35,
         # }
+        terrain_kwargs = {
+            "type": "terrain_utils.random_uniform_terrain",
+            "min_height": -0.2,
+            "max_height": 0.3,
+            "step": 0.025,
+            "downsampled_scale": 0.2,
+        }
 
     class commands(LeggedRobotCfg.commands):
         curriculum = False
@@ -120,7 +132,7 @@ class V0RoughCfg(LeggedRobotCfg):
         num_commands = 4 if heading_command else 3
 
         class ranges(LeggedRobotCfg.commands.ranges):
-            lin_vel_x = [0.7, 1.6]  # min max [m/s]
+            lin_vel_x = [0.5, 2.0]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
             heading = [0, 0]
@@ -130,7 +142,7 @@ class V0RoughCfg(LeggedRobotCfg):
 
 
     class domain_rand(LeggedRobotCfg.domain_rand):
-        friction_range = [0.05, 4.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
+        friction_range = [0.6, 1.5] # on ground planes the friction combination mode is averaging, i.e total friction = (foot_friction + 1.)/2.
         randomize_base_mass = True
         added_mass_range = [-20., 400.]
         randomize_com = True
@@ -150,8 +162,15 @@ class V0RoughCfg(LeggedRobotCfg):
         # damping = {"joint": 2.3}  # [N*m*s/rad]
         # 8x
         # urdf effort 255
-        stiffness = {"joint": 2070.0}  # [N*m/rad]
-        damping = {"joint": 0.3}  # [N*m*s/rad]
+        stiffness = {
+                "joint_1": 4070.0,
+                "joint_2": 4070.0,
+                "joint_3": 4070.0,
+            }  # [N*m/rad]
+        damping = {
+                "joint_1": 0.2,
+                "joint_2": 0.2,
+                "joint_3": 0.2,}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 3
         # decimation: Number of control action updates @ sim DT per policy DT
@@ -188,22 +207,23 @@ class V0RoughCfg(LeggedRobotCfg):
             lin_vel_z = -0.00
             ang_vel_xy = -0.0
             # orientation = -0.0
-            torques = -5e-8
+            torques = -0
             torques2 = 0
             dof_vel = -0.0
             dof_acc = -0.0
-            base_height = 0.0
+            base_height = -0.9
             feet_air_time = 0.0
             # collision = -0.00001
-            # feet_stumble = -0.0
-            action_rate = -0.0
+            # feet_stumble = -0.01
+            action_rate = -0.01
             # stand_still = -0.000005
             heading_deviation = -0.5
             speed_norm = 0.
-            half_legs_on_ground = -0
+            half_legs_on_ground = -0.01
             rotation_left = 0
             rotation_right = 0
             velwork = 0 #1e-2
+            dof_pos_limits = -0
 
     class normalization(LeggedRobotCfg.normalization):
         class obs_scales(LeggedRobotCfg.normalization.obs_scales):

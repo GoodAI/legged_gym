@@ -253,18 +253,16 @@ class LeggedRobot(BaseTask):
 
         self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, # 3
                                     self.base_ang_vel * self.obs_scales.ang_vel, # 6
-                                    # self.projected_gravity, # 9
-                                    # self.commands[:, :3] * self.commands_scale, # 12
-                                    self.commands[:, :1] * self.obs_scales.lin_vel, # 12
-                                    (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
-                                    (self.dof_vel * self.obs_scales.dof_vel),
-                                    (self.actions * self.obs_scales.actions),
-                                    (self.heading_deviation),
-                                    self.frictions * self.obs_scales.friction,
-                                    self.body_masses.unsqueeze(-1) * self.obs_scales.body_mass,
-                                    self.base_quat[:, :3],
-                                    self.body_com_x.unsqueeze(-1),
-                                    self.body_com_y.unsqueeze(-1),
+                                    self.commands[:, :1] * self.obs_scales.lin_vel, # 7
+                                    (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos, # 25
+                                    (self.dof_vel * self.obs_scales.dof_vel), # 43
+                                    (self.actions * self.obs_scales.actions), # 61
+                                    (self.heading_deviation), # 62
+                                    self.frictions * self.obs_scales.friction, # 63
+                                    self.body_masses.unsqueeze(-1) * self.obs_scales.body_mass, # 64
+                                    self.base_quat[:, :3], # 67
+                                    self.body_com_x.unsqueeze(-1), # 68
+                                    self.body_com_y.unsqueeze(-1), # 69
                                     ),dim=-1)
 
         # add perceptive inputs if not blind
@@ -727,6 +725,8 @@ class LeggedRobot(BaseTask):
         asset_options.armature = self.cfg.asset.armature
         asset_options.thickness = self.cfg.asset.thickness
         asset_options.disable_gravity = self.cfg.asset.disable_gravity
+        asset_options.override_inertia = True
+        asset_options.override_com = False
 
         robot_asset = self.gym.load_asset(self.sim, asset_root, asset_file, asset_options)
         self.num_dof = self.gym.get_asset_dof_count(robot_asset)
@@ -770,6 +770,10 @@ class LeggedRobot(BaseTask):
             self.gym.set_asset_rigid_shape_properties(robot_asset, rigid_shape_props)
             actor_handle = self.gym.create_actor(env_handle, robot_asset, start_pose, self.cfg.asset.name, i, self.cfg.asset.self_collisions, 0)
             dof_props = self._process_dof_props(dof_props_asset, i)
+            dof_props["stiffness"].fill(4000)
+            dof_props["damping"].fill(0)
+            dof_props["upper"].fill(math.inf)
+            dof_props["lower"].fill(-2 * math.inf)
             self.gym.set_actor_dof_properties(env_handle, actor_handle, dof_props)
             body_props = self.gym.get_actor_rigid_body_properties(env_handle, actor_handle)
             body_props = self._process_rigid_body_props(body_props, i)
