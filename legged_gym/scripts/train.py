@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -30,6 +30,7 @@
 
 import numpy as np
 import os
+import shutil
 from datetime import datetime
 
 import isaacgym
@@ -40,6 +41,18 @@ import torch
 def train(args):
     env, env_cfg = task_registry.make_env(name=args.task, args=args)
     ppo_runner, train_cfg = task_registry.make_alg_runner(env=env, name=args.task, args=args)
+
+    # log the asset file to make sure what was used during the training
+    if ppo_runner.log_dir is not None:
+        os.makedirs(ppo_runner.log_dir, exist_ok=True)
+        env_cfg, _ = task_registry.get_cfgs(name=args.task)
+        asset_file_src = env_cfg.asset.file.format(LEGGED_GYM_ROOT_DIR=LEGGED_GYM_ROOT_DIR)
+        asset_file_dst = os.path.join(ppo_runner.log_dir, os.path.basename(asset_file_src))
+
+        if not os.path.exists(asset_file_dst):
+            shutil.copyfile(asset_file_src, asset_file_dst)
+
+    # Train it!
     ppo_runner.learn(num_learning_iterations=train_cfg.runner.max_iterations, init_at_random_ep_len=True)
 
 if __name__ == '__main__':
