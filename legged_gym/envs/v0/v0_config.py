@@ -272,6 +272,9 @@ class V0RoughCfgPPO(LeggedRobotCfgPPO):
         algorithm_class_name = 'PPO'
 
     class policy(LeggedRobotCfgPPO.policy):
-        num_env_params = 11
-        xt_index = 18
-        action_index = 54
+        # keep in sync with legged_robot.py: compute_observation()
+        # used for environment encoder training in rsl_rl: ActorCriticEnvEncoder
+        num_env_params = 11 # last #n params of obs_buf represent environment inputs
+        xt_index = 7
+        action_index = 43
+        orientation_index = 64
